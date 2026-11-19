@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
     AudioLines,
@@ -15,7 +14,6 @@ import {
     Play,
     RefreshCw,
     Settings,
-    Sparkles,
     Square,
     Volume2,
     VolumeX,
@@ -475,142 +473,238 @@ function App() {
         };
     }, []);
 
-    const activePageTitle = {
-        composer: "Composer",
-        library: "My Library",
-        settings: "Settings"
-    }[page];
+    const totalNotes = tracks.reduce((sum, track) => sum + track.notes.length, 0);
 
     return (
         <div className="app-shell">
-            <aside className="sidebar">
-                <div className="brand">
-                    <div className="brand-icon">
-                        <AudioWaveform size={25} />
+            <header className="topbar">
+                <div className="topbar-inner">
+                    <div className="brand" onClick={() => setPage("composer")}>
+                        <div className="brand-icon">
+                            <AudioWaveform size={18} />
+                        </div>
+                        <div>
+                            <h1>Musicy Studio</h1>
+                            <span>YURPHA GAMES MUSIC REPOSITORY</span>
+                        </div>
                     </div>
-                    <div>
-                        <h1>MUSICY</h1>
-                        <span>AI MUSIC STUDIO</span>
+
+                    <nav className="topnav" aria-label="Primary navigation">
+                        <button
+                            type="button"
+                            className={`nav-pill ${page === "composer" ? "active" : ""}`}
+                            onClick={() => setPage("composer")}
+                        >
+                            <Music2 size={15} />
+                            Composer
+                        </button>
+
+                        <button
+                            type="button"
+                            className={`nav-pill ${page === "library" ? "active" : ""}`}
+                            onClick={() => {
+                                setPage("library");
+                                refreshLibrary();
+                            }}
+                        >
+                            <Library size={15} />
+                            Library
+                            {library.length > 0 && (
+                                <span className="nav-count">{library.length}</span>
+                            )}
+                        </button>
+
+                        <button
+                            type="button"
+                            className={`nav-pill ${page === "settings" ? "active" : ""}`}
+                            onClick={() => setPage("settings")}
+                        >
+                            <Settings size={15} />
+                            Settings
+                        </button>
+                    </nav>
+
+                    <div className="topbar-status">
+                        <span className="status-dot"></span>
+                        <span>STUDIO READY</span>
                     </div>
                 </div>
+            </header>
 
-                <div className="sidebar-section">
-                    <span className="sidebar-label">WORKSPACE</span>
+            <main className="page-shell">
+                <div className="page-inner">
+                    {error && (
+                        <div className="notice error-notice">
+                            <X size={16} />
+                            <span>{error}</span>
+                            <button type="button" onClick={() => setError("")} aria-label="Dismiss error">
+                                <X size={15} />
+                            </button>
+                        </div>
+                    )}
 
-                    <button
-                        className={`nav-item ${page === "composer" ? "active" : ""}`}
-                        onClick={() => setPage("composer")}
-                    >
-                        <Music2 size={19} />
-                        Composer
-                    </button>
+                    {success && (
+                        <div className="notice success-notice">
+                            <Check size={16} />
+                            <span>{success}</span>
+                            <button type="button" onClick={() => setSuccess("")} aria-label="Dismiss message">
+                                <X size={15} />
+                            </button>
+                        </div>
+                    )}
 
-                    <button
-                        className={`nav-item ${page === "library" ? "active" : ""}`}
-                        onClick={() => {
-                            setPage("library");
-                            refreshLibrary();
-                        }}
-                    >
-                        <Library size={19} />
-                        My Library
-                        {library.length > 0 && (
-                            <span className="nav-count">{library.length}</span>
-                        )}
-                    </button>
-                </div>
-
-                <div className="sidebar-section">
-                    <span className="sidebar-label">PREFERENCES</span>
-
-                    <button
-                        className={`nav-item ${page === "settings" ? "active" : ""}`}
-                        onClick={() => setPage("settings")}
-                    >
-                        <Settings size={19} />
-                        Settings
-                    </button>
-                </div>
-
-                <div className="sidebar-bottom">
-                    <div className="sidebar-help">
-                        <Sparkles size={17} />
-                        <span>Make something original.</span>
-                    </div>
-                    <div className="sidebar-version">MUSICY STUDIO · LOCAL</div>
-                </div>
-            </aside>
-
-            <main className="main-content">
-                <header className="topbar">
-                    <div className="breadcrumb">
-                        <span>Musicy</span>
-                        <span>/</span>
-                        <strong>{activePageTitle}</strong>
-                    </div>
-
-                    <div className="topbar-right">
-                        <span className="backend-status">
-                            <span className="status-dot"></span>
-                            STUDIO READY
-                        </span>
-                        <div className="profile-icon">M</div>
-                    </div>
-                </header>
-
-                <div className="page-content">
                     {page === "composer" && (
-                        <>
-                            <section className="welcome-section">
-                                <div>
-                                    <span className="eyebrow">
-                                        <AudioWaveform size={15} />
-                                        YOUR CREATIVE WORKSPACE
+                        <div className="repo-layout">
+                            <aside className="summary-column">
+                                <div className="panel summary-card">
+                                    <span className="eyebrow-pill">
+                                        <span className="dot-blue"></span>
+                                        MUSICY STUDIO ENGINE
                                     </span>
-                                    <h2>Create something <span>musical.</span></h2>
-                                    <p>
-                                        Generate original compositions, listen
-                                        instantly, and explore every instrument track.
+
+                                    <h2 className="summary-title">Composition &amp; MIDI Studio</h2>
+                                    <p className="summary-desc">
+                                        Configure parameters on the right to generate MIDI compositions, preview tracks in real time, and export archives.
                                     </p>
-                                </div>
-                                <div className="welcome-decoration">
-                                    <AudioLines size={105} strokeWidth={0.8} />
-                                </div>
-                            </section>
 
-                            {error && (
-                                <div className="notice error-notice">
-                                    <X size={18} />
-                                    <span>{error}</span>
-                                    <button onClick={() => setError("")}>
-                                        <X size={16} />
-                                    </button>
-                                </div>
-                            )}
+                                    <div className="stats-grid">
+                                        <div className="stat-box">
+                                            <span className="stat-label">SAVED</span>
+                                            <strong className="stat-value">{library.length}</strong>
+                                        </div>
+                                        <div className="stat-box">
+                                            <span className="stat-label">TRACKS</span>
+                                            <strong className="stat-value stat-accent">{tracks.length}</strong>
+                                        </div>
+                                        <div className="stat-box">
+                                            <span className="stat-label">NOTES</span>
+                                            <strong className="stat-value stat-muted">{totalNotes}</strong>
+                                        </div>
+                                    </div>
 
-                            {success && (
-                                <div className="notice success-notice">
-                                    <Check size={18} />
-                                    <span>{success}</span>
-                                    <button onClick={() => setSuccess("")}>
-                                        <X size={16} />
-                                    </button>
-                                </div>
-                            )}
+                                    <div className="player-divider"></div>
 
-                            <div className="workspace-grid">
-                                <section className="panel composer-panel">
-                                    <div className="panel-heading">
-                                        <div>
-                                            <div className="panel-icon">
-                                                <WandSparkles size={19} />
-                                            </div>
+                                    <div className="player-block-header">
+                                        <div className="panel-title-group">
+                                            <Disc3 size={16} className="icon-blue" />
                                             <div>
-                                                <h3>Composition Generator</h3>
-                                                <p>Configure your next creation</p>
+                                                <h3>MIDI Preview Player</h3>
+                                                <p>{composition ? "Composition ready" : "No composition loaded"}</p>
                                             </div>
                                         </div>
-                                        <span className="panel-tag">AI GENERATOR</span>
+                                        <span className="badge-pill">
+                                            {composition ? "READY" : "IDLE"}
+                                        </span>
+                                    </div>
+
+                                    <div className={`preview-artwork ${composition ? "has-music" : ""}`}>
+                                        <AudioWaveform size={44} strokeWidth={1.25} />
+                                        <span>{composition ? `${composition.tonic} ${composition.mode} · ${composition.bpm} BPM` : "NO COMPOSITION LOADED"}</span>
+                                    </div>
+
+                                    <div className="track-information">
+                                        <strong>{composition?.title || "Untitled Composition"}</strong>
+                                        <span>
+                                            {composition
+                                                ? `${composition.style} · ${composition.measures || form.measures} measures`
+                                                : "Generate or load a composition to preview"}
+                                        </span>
+                                    </div>
+
+                                    <div className="player-progress">
+                                        <input
+                                            className="seek-slider"
+                                            type="range"
+                                            min="0"
+                                            max={Math.max(duration, 1)}
+                                            step="0.01"
+                                            value={Math.min(position, duration)}
+                                            onChange={(event) => handleSeek(event.target.value)}
+                                            disabled={!composition}
+                                            aria-label="Seek timeline"
+                                        />
+                                        <div className="progress-times">
+                                            <span>{formatTime(position)}</span>
+                                            <span>{formatTime(duration)}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="player-controls">
+                                        <button
+                                            type="button"
+                                            className="player-button"
+                                            onClick={togglePlayback}
+                                            disabled={!composition}
+                                            aria-label={isPlaying ? "Pause" : "Play"}
+                                        >
+                                            {isPlaying
+                                                ? <Pause size={18} fill="currentColor" />
+                                                : <Play size={18} fill="currentColor" />}
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className="player-secondary"
+                                            onClick={stopPlayback}
+                                            disabled={!composition}
+                                            aria-label="Stop"
+                                        >
+                                            <Square size={14} fill="currentColor" />
+                                        </button>
+                                    </div>
+
+                                    <div className="volume-control">
+                                        {volume === 0
+                                            ? <VolumeX size={15} />
+                                            : <Volume2 size={15} />}
+                                        <input
+                                            type="range"
+                                            min="0"
+                                            max="100"
+                                            value={volume}
+                                            onChange={(event) => changeVolume(event.target.value)}
+                                            aria-label="Volume"
+                                        />
+                                        <span>{volume}%</span>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        className="download-button"
+                                        onClick={handleDownload}
+                                        disabled={!composition}
+                                    >
+                                        <Download size={15} />
+                                        Download MIDI
+                                    </button>
+                                </div>
+                            </aside>
+
+                            <section className="main-column">
+                                <div className="page-header-row">
+                                    <div>
+                                        <h2>Composition Generator</h2>
+                                        <p>Configure musical parameters, generate compositions, and inspect instrument lanes.</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="ghost-btn"
+                                        onClick={refreshLibrary}
+                                        disabled={isLibraryLoading}
+                                    >
+                                        <RefreshCw size={14} className={isLibraryLoading ? "spin" : ""} />
+                                        Sync Library
+                                    </button>
+                                </div>
+
+                                <div className="panel generator-panel">
+                                    <div className="panel-top-bar">
+                                        <div className="panel-title-group">
+                                            <span className="status-dot"></span>
+                                            <strong>Parameters &amp; Arrangement</strong>
+                                            <span className="count-chip">AI MIDI</span>
+                                        </div>
+                                        <span className="panel-meta-note">Tone.js + @tonejs/midi</span>
                                     </div>
 
                                     <form className="composer-form" onSubmit={handleGenerate}>
@@ -683,42 +777,44 @@ function App() {
                                             </div>
                                         </div>
 
-                                        <div className="field-group">
-                                            <label>Time signature</label>
-                                            <div className="time-signature">
+                                        <div className="field-row">
+                                            <div className="field-group">
+                                                <label>Time signature</label>
+                                                <div className="time-signature">
+                                                    <select
+                                                        aria-label="Time signature numerator"
+                                                        value={form.timeSignatureNumerator}
+                                                        onChange={(event) => updateForm("timeSignatureNumerator", event.target.value)}
+                                                    >
+                                                        {[2, 3, 4, 5, 6, 7, 8, 9, 12].map((value) => (
+                                                            <option key={value} value={value}>{value}</option>
+                                                        ))}
+                                                    </select>
+                                                    <span>/</span>
+                                                    <select
+                                                        aria-label="Time signature denominator"
+                                                        value={form.timeSignatureDenominator}
+                                                        onChange={(event) => updateForm("timeSignatureDenominator", event.target.value)}
+                                                    >
+                                                        {[2, 4, 8, 16].map((value) => (
+                                                            <option key={value} value={value}>{value}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div className="field-group">
+                                                <label htmlFor="style">Musical style</label>
                                                 <select
-                                                    aria-label="Time signature numerator"
-                                                    value={form.timeSignatureNumerator}
-                                                    onChange={(event) => updateForm("timeSignatureNumerator", event.target.value)}
+                                                    id="style"
+                                                    value={form.style}
+                                                    onChange={(event) => updateForm("style", event.target.value)}
                                                 >
-                                                    {[2, 3, 4, 5, 6, 7, 8, 9, 12].map((value) => (
-                                                        <option key={value} value={value}>{value}</option>
-                                                    ))}
-                                                </select>
-                                                <span>/</span>
-                                                <select
-                                                    aria-label="Time signature denominator"
-                                                    value={form.timeSignatureDenominator}
-                                                    onChange={(event) => updateForm("timeSignatureDenominator", event.target.value)}
-                                                >
-                                                    {[2, 4, 8, 16].map((value) => (
-                                                        <option key={value} value={value}>{value}</option>
+                                                    {STYLES.map(([value, label]) => (
+                                                        <option key={value} value={value}>{label}</option>
                                                     ))}
                                                 </select>
                                             </div>
-                                        </div>
-
-                                        <div className="field-group">
-                                            <label htmlFor="style">Musical style</label>
-                                            <select
-                                                id="style"
-                                                value={form.style}
-                                                onChange={(event) => updateForm("style", event.target.value)}
-                                            >
-                                                {STYLES.map(([value, label]) => (
-                                                    <option key={value} value={value}>{label}</option>
-                                                ))}
-                                            </select>
                                         </div>
 
                                         <div className="field-row">
@@ -751,332 +847,228 @@ function App() {
                                             disabled={isGenerating}
                                         >
                                             {isGenerating ? (
-                                                <LoaderCircle className="spin" size={19} />
+                                                <LoaderCircle className="spin" size={16} />
                                             ) : (
-                                                <WandSparkles size={19} />
+                                                <WandSparkles size={16} />
                                             )}
-                                            {isGenerating ? "Generating composition..." : "Generate composition"}
+                                            {isGenerating ? "Generating composition..." : "Generate Composition"}
                                         </button>
                                     </form>
-                                </section>
-
-                                <section className="panel preview-panel">
-                                    <div className="panel-heading">
-                                        <div>
-                                            <div className="panel-icon">
-                                                <Disc3 size={19} />
-                                            </div>
-                                            <div>
-                                                <h3>Music Player</h3>
-                                                <p>Listen to your composition</p>
-                                            </div>
-                                        </div>
-                                        <span className="panel-tag">MIDI PLAYER</span>
-                                    </div>
-
-                                    <div className={`preview-artwork ${composition ? "has-music" : ""}`}>
-                                        <AudioWaveform size={66} strokeWidth={1} />
-                                        <span>{composition ? "NOW READY TO PLAY" : "NO COMPOSITION LOADED"}</span>
-                                    </div>
-
-                                    <div className="track-information">
-                                        <strong>{composition?.title || "Untitled Composition"}</strong>
-                                        <span>
-                                            {composition
-                                                ? `${composition.tonic} ${composition.mode} · ${composition.bpm} BPM · ${composition.style}`
-                                                : "Generate a composition to begin"}
-                                        </span>
-                                    </div>
-
-                                    <div className="player-progress">
-                                        <input
-                                            className="seek-slider"
-                                            type="range"
-                                            min="0"
-                                            max={Math.max(duration, 1)}
-                                            step="0.01"
-                                            value={Math.min(position, duration)}
-                                            onChange={(event) => handleSeek(event.target.value)}
-                                            disabled={!composition}
-                                        />
-                                        <div className="progress-times">
-                                            <span>{formatTime(position)}</span>
-                                            <span>{formatTime(duration)}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="player-controls">
-                                        <button
-                                            className="player-button"
-                                            onClick={togglePlayback}
-                                            disabled={!composition}
-                                            aria-label={isPlaying ? "Pause" : "Play"}
-                                        >
-                                            {isPlaying
-                                                ? <Pause size={22} fill="currentColor" />
-                                                : <Play size={22} fill="currentColor" />}
-                                        </button>
-
-                                        <button
-                                            className="player-secondary"
-                                            onClick={stopPlayback}
-                                            disabled={!composition}
-                                            aria-label="Stop"
-                                        >
-                                            <Square size={16} fill="currentColor" />
-                                        </button>
-                                    </div>
-
-                                    <div className="volume-control">
-                                        {volume === 0
-                                            ? <VolumeX size={17} />
-                                            : <Volume2 size={17} />}
-                                        <input
-                                            type="range"
-                                            min="0"
-                                            max="100"
-                                            value={volume}
-                                            onChange={(event) => changeVolume(event.target.value)}
-                                            aria-label="Volume"
-                                        />
-                                        <span>{volume}%</span>
-                                    </div>
-
-                                    <button
-                                        className="download-button"
-                                        onClick={handleDownload}
-                                        disabled={!composition}
-                                    >
-                                        <Download size={17} />
-                                        Download MIDI
-                                    </button>
-                                </section>
-                            </div>
-
-                            <section className="panel tracks-panel">
-                                <div className="panel-heading">
-                                    <div>
-                                        <div className="panel-icon">
-                                            <AudioLines size={19} />
-                                        </div>
-                                        <div>
-                                            <h3>Track Editor</h3>
-                                            <p>
-                                                {tracks.length
-                                                    ? `${tracks.length} MIDI tracks · ${tracks.reduce((sum, track) => sum + track.notes.length, 0)} notes`
-                                                    : "Instrument tracks and MIDI visualization"}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        className="secondary-button"
-                                        onClick={() => setExpandedTracks((value) => !value)}
-                                        disabled={!tracks.length}
-                                    >
-                                        <ChevronDown
-                                            size={16}
-                                            className={expandedTracks ? "" : "rotated"}
-                                        />
-                                        {expandedTracks ? "Collapse" : "Expand"}
-                                    </button>
                                 </div>
 
-                                {!tracks.length ? (
-                                    <div className="empty-tracks">
-                                        <div className="track-grid-decoration">
-                                            {Array.from({ length: 32 }).map((_, index) => (
-                                                <div key={index}></div>
-                                            ))}
-                                        </div>
-                                        <p>Your generated instrument tracks will appear here.</p>
-                                    </div>
-                                ) : expandedTracks && (
-                                    <div className="track-editor">
-                                        <div className="timeline-ruler">
-                                            {Array.from({ length: 9 }).map((_, index) => (
-                                                <span key={index}> {index + 1} </span>
-                                            ))}
+                                <div className="panel tracks-panel">
+                                    <div className="panel-top-bar">
+                                        <div className="panel-title-group">
+                                            <AudioLines size={16} className="icon-blue" />
+                                            <strong>Track &amp; MIDI Visualizer</strong>
+                                            <span className="count-chip">{tracks.length}</span>
                                         </div>
 
-                                        {tracks.map((track, index) => (
-                                            <div
-                                                className={`track-row ${selectedTrack === index ? "selected" : ""}`}
-                                                key={track.id}
-                                                onClick={() => setSelectedTrack(index)}
-                                            >
-                                                <div className="track-label">
-                                                    <span className={`track-color track-color-${index % 6}`}></span>
-                                                    <div>
-                                                        <strong>{track.name}</strong>
-                                                        <span>
-                                                            {track.isDrum ? "Drums" : track.instrument}
-                                                            {" · "}
-                                                            {track.notes.length} notes
-                                                        </span>
+                                        <button
+                                            type="button"
+                                            className="ghost-btn compact-btn"
+                                            onClick={() => setExpandedTracks((value) => !value)}
+                                            disabled={!tracks.length}
+                                        >
+                                            <ChevronDown
+                                                size={14}
+                                                className={expandedTracks ? "" : "rotated"}
+                                            />
+                                            {expandedTracks ? "Collapse" : "Expand"}
+                                        </button>
+                                    </div>
+
+                                    {!tracks.length ? (
+                                        <div className="empty-tracks">
+                                            <div className="track-grid-decoration">
+                                                {Array.from({ length: 24 }).map((_, index) => (
+                                                    <div key={index}></div>
+                                                ))}
+                                            </div>
+                                            <p>No MIDI tracks loaded yet. Generate or load a composition to inspect notes.</p>
+                                        </div>
+                                    ) : expandedTracks && (
+                                        <div className="track-editor">
+                                            <div className="timeline-ruler">
+                                                {Array.from({ length: 9 }).map((_, index) => (
+                                                    <span key={index}>{index + 1}</span>
+                                                ))}
+                                            </div>
+
+                                            {tracks.map((track, index) => (
+                                                <div
+                                                    className={`track-row ${selectedTrack === index ? "selected" : ""}`}
+                                                    key={track.id}
+                                                    onClick={() => setSelectedTrack(index)}
+                                                >
+                                                    <div className="track-label">
+                                                        <span className={`track-color track-color-${index % 6}`}></span>
+                                                        <div>
+                                                            <strong>{track.name}</strong>
+                                                            <span>
+                                                                {track.isDrum ? "Drums" : track.instrument}
+                                                                {" · "}
+                                                                {track.notes.length} notes
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="note-lane">
+                                                        {track.notes.map((note, noteIndex) => (
+                                                            <div
+                                                                key={`${track.id}-${noteIndex}`}
+                                                                className={`midi-note midi-note-${index % 6}`}
+                                                                title={`${note.name} · ${note.duration.toFixed(2)}s`}
+                                                                style={{
+                                                                    left: `${(note.time / duration) * 100}%`,
+                                                                    width: `${Math.max((note.duration / duration) * 100, 0.25)}%`,
+                                                                    top: `${Math.max(4, Math.min(88, 88 - ((note.midi - 24) / 72) * 84))}%`
+                                                                }}
+                                                            />
+                                                        ))}
+                                                        <div
+                                                            className="playhead"
+                                                            style={{ left: `${duration ? (position / duration) * 100 : 0}%` }}
+                                                        />
                                                     </div>
                                                 </div>
+                                            ))}
+                                        </div>
+                                    )}
 
-                                                <div className="note-lane">
-                                                    {track.notes.map((note, noteIndex) => (
-                                                        <div
-                                                            key={`${track.id}-${noteIndex}`}
-                                                            className={`midi-note midi-note-${index % 6}`}
-                                                            title={`${note.name} · ${note.duration.toFixed(2)}s`}
-                                                            style={{
-                                                                left: `${(note.time / duration) * 100}%`,
-                                                                width: `${Math.max((note.duration / duration) * 100, 0.25)}%`,
-                                                                top: `${Math.max(4, Math.min(88, 88 - ((note.midi - 24) / 72) * 84))}%`
-                                                            }}
-                                                        />
-                                                    ))}
-                                                    <div
-                                                        className="playhead"
-                                                        style={{ left: `${duration ? (position / duration) * 100 : 0}%` }}
-                                                    />
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-
-                                {tracks.length > 0 && (
-                                    <div className="track-footer">
-                                        <span>
-                                            <Clock3 size={14} />
-                                            {formatTime(duration)} total duration
-                                        </span>
-                                        <span>
-                                            {tracks[selectedTrack]?.name || "No track selected"}
-                                        </span>
-                                    </div>
-                                )}
+                                    {tracks.length > 0 && (
+                                        <div className="track-footer">
+                                            <span>
+                                                <Clock3 size={13} />
+                                                {formatTime(duration)} total duration
+                                            </span>
+                                            <span>
+                                                Selected: {tracks[selectedTrack]?.name || "None"}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
                             </section>
-                        </>
+                        </div>
                     )}
 
                     {page === "library" && (
-                        <section className="library-page">
-                            <div className="page-title">
+                        <section className="subpage-section">
+                            <div className="page-header-row">
                                 <div>
-                                    <span className="eyebrow">YOUR CREATIONS</span>
-                                    <h2>My Library</h2>
-                                    <p>Your saved compositions, stored on your Musicy server.</p>
+                                    <h2>Saved Compositions Library</h2>
+                                    <p>Browse compositions stored on your backend, load them into the studio, or download MIDI files.</p>
                                 </div>
-                                <div className="library-header-actions">
-                                    <span className="library-count">{library.length} compositions</span>
+                                <div className="header-actions">
+                                    <span className="count-chip">{library.length} total</span>
                                     <button
-                                        className="secondary-button"
+                                        type="button"
+                                        className="ghost-btn"
                                         onClick={refreshLibrary}
                                         disabled={isLibraryLoading}
                                     >
-                                        <RefreshCw size={15} className={isLibraryLoading ? "spin" : ""} />
+                                        <RefreshCw size={14} className={isLibraryLoading ? "spin" : ""} />
                                         Refresh
                                     </button>
                                 </div>
                             </div>
 
-                            {error && (
-                                <div className="notice error-notice">
-                                    <X size={18} />
-                                    <span>{error}</span>
-                                    <button onClick={() => setError("")}>
-                                        <X size={16} />
-                                    </button>
-                                </div>
-                            )}
-
-                            {success && (
-                                <div className="notice success-notice">
-                                    <Check size={18} />
-                                    <span>{success}</span>
-                                    <button onClick={() => setSuccess("")}>
-                                        <X size={16} />
-                                    </button>
-                                </div>
-                            )}
-
                             {isLibraryLoading ? (
-                                <div className="library-empty">
-                                    <LoaderCircle size={38} className="spin" />
-                                    <h3>Loading your library</h3>
-                                    <p>Retrieving your saved compositions from the server.</p>
+                                <div className="panel empty-state-card">
+                                    <LoaderCircle size={32} className="spin icon-blue" />
+                                    <h3>Loading compositions</h3>
+                                    <p>Fetching saved compositions from your server...</p>
                                 </div>
                             ) : library.length === 0 ? (
-                                <div className="library-empty">
-                                    <Library size={42} />
-                                    <h3>Your library is empty</h3>
-                                    <p>Generate a composition and it will be saved here automatically.</p>
-                                    <button onClick={() => setPage("composer")}>
+                                <div className="panel empty-state-card">
+                                    <Library size={36} className="icon-blue" />
+                                    <h3>No compositions saved yet</h3>
+                                    <p>Generate a composition in the studio and it will show up here automatically.</p>
+                                    <button
+                                        type="button"
+                                        className="generate-button inline-btn"
+                                        onClick={() => setPage("composer")}
+                                    >
                                         Open Composer
                                     </button>
                                 </div>
                             ) : (
-                                <div className="library-grid">
+                                <div className="library-list">
                                     {library.map((item) => (
-                                        <div className="library-card" key={item.fileName}>
-                                            <div className="library-art">
-                                                <AudioWaveform size={37} />
-                                            </div>
-                                            <div className="library-card-content">
-                                                <strong>{item.title || "Untitled Composition"}</strong>
-                                                <span>
-                                                    {item.tonic} {item.mode} · {item.bpm} BPM
-                                                </span>
-                                                <span>
-                                                    {item.style} · {item.timeSignatureNumerator}/{item.timeSignatureDenominator} · {item.measures} measures
-                                                </span>
-                                                {item.createdAt && (
-                                                    <span>
-                                                        {new Date(item.createdAt).toLocaleString()}
-                                                    </span>
-                                                )}
-                                                <div className="library-card-actions">
-                                                    <button
-                                                        onClick={() => loadFromLibrary(item)}
-                                                        disabled={isGenerating || deletingFileName === item.fileName}
-                                                    >
-                                                        <Play size={15} />
-                                                        Play / Load
-                                                    </button>
-                                                    <button
-                                                        onClick={async () => {
-                                                            try {
-                                                                const response = await fetch(getCompositionDownloadUrl(item));
-                                                                if (!response.ok) throw new Error(`Download failed (${response.status}).`);
-                                                                const blob = await response.blob();
-                                                                const objectUrl = URL.createObjectURL(blob);
-                                                                const link = document.createElement("a");
-                                                                link.href = objectUrl;
-                                                                link.download = item.fileName;
-                                                                document.body.appendChild(link);
-                                                                link.click();
-                                                                link.remove();
-                                                                URL.revokeObjectURL(objectUrl);
-                                                            } catch (downloadError) {
-                                                                setError(downloadError.message);
-                                                            }
-                                                        }}
-                                                        disabled={deletingFileName === item.fileName}
-                                                        aria-label={`Download ${item.title || item.fileName}`}
-                                                    >
-                                                        <Download size={15} />
-                                                        Download
-                                                    </button>
-                                                    <button
-                                                        className="library-delete-button"
-                                                        onClick={() => handleDeleteComposition(item)}
-                                                        disabled={deletingFileName === item.fileName}
-                                                        aria-label={`Delete ${item.title || item.fileName}`}
-                                                    >
-                                                        {deletingFileName === item.fileName ? (
-                                                            <LoaderCircle size={15} className="spin" />
-                                                        ) : (
-                                                            <X size={15} />
-                                                        )}
-                                                        Delete
-                                                    </button>
+                                        <div className="panel archive-item-card" key={item.fileName}>
+                                            <div className="archive-item-main">
+                                                <div className="archive-icon-box">
+                                                    <AudioWaveform size={18} />
                                                 </div>
+                                                <div className="archive-meta">
+                                                    <div className="archive-title-line">
+                                                        <strong>{item.title || "Untitled Composition"}</strong>
+                                                        <span className="badge-pill">
+                                                            {item.tonic} {item.mode}
+                                                        </span>
+                                                    </div>
+                                                    <span className="archive-sub">
+                                                        {item.style} · {item.bpm} BPM · {item.timeSignatureNumerator}/{item.timeSignatureDenominator} · {item.measures} measures
+                                                    </span>
+                                                    {item.createdAt && (
+                                                        <span className="archive-date">
+                                                            {new Date(item.createdAt).toLocaleString()}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="archive-actions">
+                                                <button
+                                                    type="button"
+                                                    className="ghost-btn compact-btn"
+                                                    onClick={() => loadFromLibrary(item)}
+                                                    disabled={isGenerating || deletingFileName === item.fileName}
+                                                >
+                                                    <Play size={13} />
+                                                    Load
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    className="primary-sm-btn"
+                                                    onClick={async () => {
+                                                        try {
+                                                            const response = await fetch(getCompositionDownloadUrl(item));
+                                                            if (!response.ok) throw new Error(`Download failed (${response.status}).`);
+                                                            const blob = await response.blob();
+                                                            const objectUrl = URL.createObjectURL(blob);
+                                                            const link = document.createElement("a");
+                                                            link.href = objectUrl;
+                                                            link.download = item.fileName;
+                                                            document.body.appendChild(link);
+                                                            link.click();
+                                                            link.remove();
+                                                            URL.revokeObjectURL(objectUrl);
+                                                        } catch (downloadError) {
+                                                            setError(downloadError.message);
+                                                        }
+                                                    }}
+                                                    disabled={deletingFileName === item.fileName}
+                                                >
+                                                    <Download size={13} />
+                                                    Download
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    className="danger-sm-btn"
+                                                    onClick={() => handleDeleteComposition(item)}
+                                                    disabled={deletingFileName === item.fileName}
+                                                    aria-label={`Delete ${item.title || item.fileName}`}
+                                                >
+                                                    {deletingFileName === item.fileName ? (
+                                                        <LoaderCircle size={13} className="spin" />
+                                                    ) : (
+                                                        <X size={13} />
+                                                    )}
+                                                    Delete
+                                                </button>
                                             </div>
                                         </div>
                                     ))}
@@ -1086,42 +1078,48 @@ function App() {
                     )}
 
                     {page === "settings" && (
-                        <section className="settings-page">
-                            <div className="page-title">
+                        <section className="subpage-section">
+                            <div className="page-header-row">
                                 <div>
-                                    <span className="eyebrow">STUDIO CONFIGURATION</span>
-                                    <h2>Settings</h2>
-                                    <p>Configure your music production workspace.</p>
+                                    <h2>Studio Settings</h2>
+                                    <p>Runtime audio and backend configuration for this workspace.</p>
                                 </div>
                             </div>
 
                             <div className="panel settings-panel">
                                 <div className="settings-row">
                                     <div>
-                                        <strong>Audio engine</strong>
-                                        <span>Browser audio powered by Tone.js</span>
+                                        <strong>Audio synthesis engine</strong>
+                                        <span>Real-time Web Audio playback powered by Tone.js</span>
                                     </div>
-                                    <span className="settings-value">Tone.js</span>
+                                    <span className="badge-pill">Tone.js</span>
                                 </div>
                                 <div className="settings-row">
                                     <div>
-                                        <strong>Composition backend</strong>
-                                        <span>Spring Boot music generation API</span>
+                                        <strong>Composition service</strong>
+                                        <span>Spring Boot generation &amp; library API</span>
                                     </div>
-                                    <span className="settings-value">Spring Boot</span>
+                                    <span className="badge-pill">Spring Boot</span>
                                 </div>
                                 <div className="settings-row">
                                     <div>
-                                        <strong>Playback format</strong>
-                                        <span>MIDI parsed and synthesized in browser</span>
+                                        <strong>Track format</strong>
+                                        <span>Parsed client-side via @tonejs/midi</span>
                                     </div>
-                                    <span className="settings-value">MIDI</span>
+                                    <span className="badge-pill">Standard MIDI</span>
                                 </div>
                             </div>
                         </section>
                     )}
                 </div>
             </main>
+
+            <footer className="bottombar">
+                <div className="bottombar-inner">
+                    <span>Musicy Studio — Yurpha Games</span>
+                    <span className="footer-muted">MIDI &amp; Tone.js Workspace</span>
+                </div>
+            </footer>
         </div>
     );
 }
